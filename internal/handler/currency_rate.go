@@ -7,18 +7,22 @@ import (
 	"net/http"
 )
 
-type CurrencyRateHandler struct {
-	monobankClient *monobank.Client
-	log            *slog.Logger
+type CurrencyRateFetcher interface {
+	FetchUSDToUAHCurrencyRate() (monobank.CurrencyRate, error)
 }
 
-func NewCurrencyRateHandler(monobankClient *monobank.Client, log *slog.Logger) *CurrencyRateHandler {
-	return &CurrencyRateHandler{monobankClient: monobankClient, log: log}
+type CurrencyRateHandler struct {
+	fetcher CurrencyRateFetcher
+	log     *slog.Logger
+}
+
+func NewCurrencyRateHandler(fetcher CurrencyRateFetcher, log *slog.Logger) *CurrencyRateHandler {
+	return &CurrencyRateHandler{fetcher: fetcher, log: log}
 }
 
 func (h *CurrencyRateHandler) GetCurrencyRate(w http.ResponseWriter, r *http.Request) {
 
-	rate, err := h.monobankClient.FetchUSDToUAHCurrencyRate()
+	rate, err := h.fetcher.FetchUSDToUAHCurrencyRate()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

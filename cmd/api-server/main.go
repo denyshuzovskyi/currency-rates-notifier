@@ -4,8 +4,10 @@ import (
 	"currency-rates-notifier/internal/api/monobank"
 	"currency-rates-notifier/internal/config"
 	"currency-rates-notifier/internal/handler"
+	"currency-rates-notifier/internal/job"
 	"currency-rates-notifier/internal/storage/sqlite"
 	"fmt"
+	"github.com/robfig/cron/v3"
 	"log/slog"
 	"net/http"
 	"os"
@@ -21,6 +23,15 @@ func main() {
 		log.Error("failed to init storage", "error", err)
 		os.Exit(1)
 	}
+
+	notifier := job.NewCurrencyRateNotifier(monobankClient, storage, log)
+	c := cron.New()
+	_, err = c.AddFunc("0 1 * * *", notifier.SendEmailToSubscribers)
+	if err != nil {
+		log.Error("failed to schedule notification job", "error", err)
+		os.Exit(1)
+	}
+	c.Start()
 
 	router := http.NewServeMux()
 	currencyRateHandler := handler.NewCurrencyRateHandler(monobankClient, log)
