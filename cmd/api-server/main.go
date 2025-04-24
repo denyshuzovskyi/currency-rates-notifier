@@ -8,6 +8,7 @@ import (
 	"currency-rates-notifier/internal/storage/sqlite"
 	"fmt"
 	"github.com/robfig/cron/v3"
+	"github.com/wneessen/go-mail"
 	"log/slog"
 	"net/http"
 	"os"
@@ -24,7 +25,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	notifier := job.NewCurrencyRateNotifier(monobankClient, storage, log)
+	emailClient, err := mail.NewClient(cfg.Email.Host,
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithTLSPortPolicy(mail.TLSMandatory),
+		mail.WithUsername(cfg.Email.User), mail.WithPassword(cfg.Email.Password),
+	)
+
+	notifier := job.NewCurrencyRateNotifier(monobankClient, storage, emailClient, log, cfg.Email)
 	c := cron.New()
 	_, err = c.AddFunc("0 1 * * *", notifier.SendEmailToSubscribers)
 	if err != nil {

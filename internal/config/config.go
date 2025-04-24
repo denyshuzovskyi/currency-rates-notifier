@@ -10,6 +10,7 @@ type Config struct {
 	Env        string `yaml:"env" env-default:"local"`
 	HTTPServer `yaml:"server"`
 	Monobank   Monobank `yaml:"monobank"`
+	Email      Email    `yaml:"email"`
 }
 
 type HTTPServer struct {
@@ -23,6 +24,16 @@ type Monobank struct {
 
 type API struct {
 	URL string `yaml:"url"`
+}
+
+type Email struct {
+	Host            string `yaml:"host"`
+	User            string `yaml:"user"`
+	Password        string `yaml:"password"`
+	EnvelopeFrom    string `yaml:"envelopeFrom"`
+	From            string `yaml:"from"`
+	Subject         string `yaml:"subject"`
+	MessageTemplate string `yaml:"messageTemplate"`
 }
 
 func ReadConfig(configPath string) *Config {

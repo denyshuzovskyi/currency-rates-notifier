@@ -5,3 +5,11 @@ server:
 monobank:
   api:
     url: "https://api.monobank.ua"
+email:
+  host: "smtp.test.com"
+  user: "user"
+  password: "pass"
+  envelopeFrom: "noreply+%d@test.com"
+  from: "danny@test.com"
+  subject: "Currency rate update"
+  messageTemplate: "{{.CurrencyCodeA}}/{{.CurrencyCodeB}} currency rate is {{.RateSell}} (sell) {{.RateBuy}} (buy)"
